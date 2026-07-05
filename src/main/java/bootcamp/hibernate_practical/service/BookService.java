@@ -7,6 +7,7 @@ import bootcamp.hibernate_practical.entity.Book;
 import bootcamp.hibernate_practical.repository.BookRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -50,27 +51,14 @@ public class BookService {
     }
 
     public BookResponse updateBook(Long id, UpdateBookRequest request) {
-        // TODO
-        // Find existing book
-        // Update its fields
-        // Save the updated entity
-        // Convert to BookResponse
-
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Book to update not found with given id " + id));
 
-        if (request.getTitle() != null) {
-            book.setTitle(request.getTitle());
-        }
-        if (request.getAuthor() != null) {
-            book.setAuthor(request.getAuthor());
-        }
-        if (request.getGenre() != null) {
-            book.setGenre(request.getGenre());
-        }
-        if (request.getPublicationYear() != null) {
-            book.setPublicationYear(request.getPublicationYear());
-        }
+        book.setTitle(request.getTitle());
+        book.setAuthor(request.getAuthor());
+        book.setGenre(request.getGenre());
+        book.setPublicationYear(request.getPublicationYear());
+
         if (request.getAvailable() != null) {
             book.setAvailable(request.getAvailable());
         }

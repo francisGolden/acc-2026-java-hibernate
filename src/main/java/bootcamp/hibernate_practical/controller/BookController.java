@@ -6,7 +6,9 @@ import bootcamp.hibernate_practical.dto.UpdateBookRequest;
 import bootcamp.hibernate_practical.service.BookService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/books")
@@ -43,7 +45,7 @@ public class BookController {
     }
 
     @GetMapping("/author/{author}")
-    public List<BookResponse> getBooksByAuthor(@PathVariable String author) {
+    public List<BookResponse> getBooksByAuthor(@PathVariable String author){
         return bookService.findByAuthor(author);
     }
 
