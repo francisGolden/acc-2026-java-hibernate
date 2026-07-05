@@ -86,7 +86,7 @@ public class BookService {
     }
 
     public List<BookResponse> findByAuthor(String author) {
-        List<Book> books = bookRepository.findBooksByAuthor(author);
+        List<Book> books = bookRepository.findBooksByAuthorIgnoreCase(author);
         return books.stream()
                 .map(book -> new BookResponse(book.getId(), book.getTitle(), book.getAuthor(),
                 book.getGenre(), book.getPublicationYear(), book.isAvailable()))
