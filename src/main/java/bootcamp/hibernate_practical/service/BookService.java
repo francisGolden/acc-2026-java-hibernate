@@ -6,13 +6,11 @@ import bootcamp.hibernate_practical.dto.UpdateBookRequest;
 import bootcamp.hibernate_practical.entity.Book;
 import bootcamp.hibernate_practical.exception.BookNotFoundException;
 import bootcamp.hibernate_practical.repository.BookRepository;
-import bootcamp.hibernate_practical.repository.InvalidPublicationYearException;
+import bootcamp.hibernate_practical.exception.InvalidPublicationYearException;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
+import java.time.ZoneId;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import java.time.Year;
 
 @Service
@@ -24,6 +22,11 @@ public class BookService {
     }
 
     public BookResponse createBook(CreateBookRequest request) {
+        if (Integer.toString(request.getPublicationYear()).length() != 4 ||
+                request.getPublicationYear() > Year.now(ZoneId.systemDefault()).getValue()) {
+            throw new InvalidPublicationYearException(request.getPublicationYear());
+        }
+
         Book book = new Book(
                 request.getTitle(),
                 request.getAuthor(),
@@ -31,34 +34,26 @@ public class BookService {
                 request.getPublicationYear(),
                 true
         );
+
         Book savedBook = bookRepository.save(book);
         return mapToResponse(savedBook);
     }
 
     public List<BookResponse> getAllBooks() {
         List<Book> allBooks = bookRepository.findAll();
-        return allBooks.stream().map(book -> new BookResponse(
-                book.getId(), book.getTitle(), book.getAuthor(), book.getGenre(),
-                book.getPublicationYear(), book.isAvailable()))
-                .toList();
+        return allBooks.stream().map(this::mapToResponse).toList();
     }
 
     public List<BookResponse> getBooksByTitle(String title){
         List<Book> books = bookRepository.findByTitleContainingIgnoreCase(title);
-        return books.stream().map(book -> new BookResponse(
-                        book.getId(), book.getTitle(), book.getAuthor(), book.getGenre(),
-                        book.getPublicationYear(), book.isAvailable()))
-                .toList();
+        return books.stream().map(this::mapToResponse).toList();
     }
 
     public BookResponse getBookById(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new BookNotFoundException(id));
 
-        return new BookResponse(
-                book.getId(), book.getTitle(), book.getAuthor(),
-                book.getGenre(), book.getPublicationYear(), book.isAvailable()
-        );
+        return mapToResponse(book);
     }
 
     public BookResponse updateBook(Long id, UpdateBookRequest request) {
@@ -70,7 +65,7 @@ public class BookService {
         book.setGenre(request.getGenre());
 
         if (Integer.toString(request.getPublicationYear()).length() != 4 ||
-                request.getPublicationYear() > Year.now().getValue()) {
+                request.getPublicationYear() > Year.now(ZoneId.systemDefault()).getValue()) {
             throw new InvalidPublicationYearException(request.getPublicationYear());
         }
 
@@ -82,10 +77,7 @@ public class BookService {
 
         bookRepository.save(book);
 
-        return new BookResponse(
-                book.getId(), book.getTitle(), book.getAuthor(),
-                book.getGenre(), book.getPublicationYear(), book.isAvailable()
-        );
+        return mapToResponse(book);
     }
 
     public void deleteBook(Long id) {
@@ -95,19 +87,12 @@ public class BookService {
 
     public List<BookResponse> findByAuthor(String author) {
         List<Book> books = bookRepository.findBooksByAuthorIgnoreCase(author);
-        return books.stream()
-                .map(book -> new BookResponse(book.getId(), book.getTitle(), book.getAuthor(),
-                book.getGenre(), book.getPublicationYear(), book.isAvailable()))
-                .toList();
+        return books.stream().map(this::mapToResponse).toList();
     }
 
     public List<BookResponse> findAvailableBooks(){
         List<Book> books = bookRepository.findByAvailableTrue();
-        return books.stream()
-                .map(book -> new BookResponse(book.getId(), book.getTitle(), book.getAuthor(),
-                        book.getGenre(), book.getPublicationYear(), book.isAvailable())
-                )
-                .toList();
+        return books.stream().map(this::mapToResponse).toList();
     }
 
     private BookResponse mapToResponse(Book book) {
