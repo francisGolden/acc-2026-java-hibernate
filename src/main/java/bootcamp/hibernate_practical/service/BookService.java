@@ -41,6 +41,15 @@ public class BookService {
                 .toList();
     }
 
+    public List<BookResponse> getBooksByTitle(String title){
+        List<Book> allBooks = bookRepository.findAll();
+        List<Book> filteredBooks = allBooks.stream().filter(book -> book.getTitle().toLowerCase().contains(title.toLowerCase())).toList();
+        return filteredBooks.stream().map(book -> new BookResponse(
+                        book.getId(), book.getTitle(), book.getAuthor(), book.getGenre(),
+                        book.getPublicationYear(), book.isAvailable()))
+                .toList();
+    }
+
     public BookResponse getBookById(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new BookNotFoundException(id));
