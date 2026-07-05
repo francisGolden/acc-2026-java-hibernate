@@ -4,7 +4,9 @@ import bootcamp.hibernate_practical.dto.BookResponse;
 import bootcamp.hibernate_practical.dto.CreateBookRequest;
 import bootcamp.hibernate_practical.dto.UpdateBookRequest;
 import bootcamp.hibernate_practical.entity.Book;
+import bootcamp.hibernate_practical.exception.BookAlreadyPresentException;
 import bootcamp.hibernate_practical.exception.BookNotFoundException;
+import bootcamp.hibernate_practical.exception.InvalidCreateOrUpdateBookRequest;
 import bootcamp.hibernate_practical.repository.BookRepository;
 import bootcamp.hibernate_practical.exception.InvalidPublicationYearException;
 import org.springframework.stereotype.Service;
@@ -22,9 +24,18 @@ public class BookService {
     }
 
     public BookResponse createBook(CreateBookRequest request) {
+        if (request.getTitle().isEmpty() || request.getAuthor().isEmpty() ||
+                request.getGenre().isEmpty() || request.getPublicationYear() == 0) {
+            throw new InvalidCreateOrUpdateBookRequest();
+        }
+
         if (Integer.toString(request.getPublicationYear()).length() != 4 ||
                 request.getPublicationYear() > Year.now(ZoneId.systemDefault()).getValue()) {
             throw new InvalidPublicationYearException(request.getPublicationYear());
+        }
+
+        if (!bookRepository.findByTitleIgnoreCase(request.getTitle()).isEmpty()){
+            throw new BookAlreadyPresentException(request.getTitle());
         }
 
         Book book = new Book(
@@ -57,17 +68,18 @@ public class BookService {
     }
 
     public BookResponse updateBook(Long id, UpdateBookRequest request) {
+        if (request.getTitle().isEmpty() || request.getAuthor().isEmpty() ||
+                request.getGenre().isEmpty() || request.getPublicationYear() == 0 ||
+                request.getAvailable() == null) {
+            throw new InvalidCreateOrUpdateBookRequest();
+        }
+
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new BookNotFoundException(id));
 
         book.setTitle(request.getTitle());
         book.setAuthor(request.getAuthor());
         book.setGenre(request.getGenre());
-
-        if (Integer.toString(request.getPublicationYear()).length() != 4 ||
-                request.getPublicationYear() > Year.now(ZoneId.systemDefault()).getValue()) {
-            throw new InvalidPublicationYearException(request.getPublicationYear());
-        }
 
         book.setPublicationYear(request.getPublicationYear());
 
