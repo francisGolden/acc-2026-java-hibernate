@@ -6,12 +6,14 @@ import bootcamp.hibernate_practical.dto.UpdateBookRequest;
 import bootcamp.hibernate_practical.entity.Book;
 import bootcamp.hibernate_practical.exception.BookNotFoundException;
 import bootcamp.hibernate_practical.repository.BookRepository;
+import bootcamp.hibernate_practical.repository.InvalidPublicationYearException;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.time.Year;
 
 @Service
 public class BookService {
@@ -66,6 +68,12 @@ public class BookService {
         book.setTitle(request.getTitle());
         book.setAuthor(request.getAuthor());
         book.setGenre(request.getGenre());
+
+        if (Integer.toString(request.getPublicationYear()).length() != 4 ||
+                request.getPublicationYear() > Year.now().getValue()) {
+            throw new InvalidPublicationYearException(request.getPublicationYear());
+        }
+
         book.setPublicationYear(request.getPublicationYear());
 
         if (request.getAvailable() != null) {
