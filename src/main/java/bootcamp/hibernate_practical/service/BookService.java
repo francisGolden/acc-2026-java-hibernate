@@ -24,12 +24,13 @@ public class BookService {
     }
 
     public BookResponse createBook(CreateBookRequest request) {
-        if (request.getTitle().isEmpty() || request.getAuthor().isEmpty() ||
-                request.getGenre().isEmpty() || request.getPublicationYear() == 0) {
+        if (request.getTitle().isBlank() || request.getAuthor().isBlank() ||
+                request.getGenre().isBlank() || request.getPublicationYear() == null) {
             throw new InvalidCreateOrUpdateBookRequest();
         }
 
-        if (Integer.toString(request.getPublicationYear()).length() != 4 ||
+        if (Integer.toString(request.getPublicationYear()).length() < 4 ||
+                request.getPublicationYear() < 0 ||
                 request.getPublicationYear() > Year.now(ZoneId.systemDefault()).getValue()) {
             throw new InvalidPublicationYearException(request.getPublicationYear());
         }
@@ -68,8 +69,8 @@ public class BookService {
     }
 
     public BookResponse updateBook(Long id, UpdateBookRequest request) {
-        if (request.getTitle().isEmpty() && request.getAuthor().isEmpty() &&
-                request.getGenre().isEmpty() && request.getPublicationYear() == 0 &&
+        if (request.getTitle().isBlank() && request.getAuthor().isBlank() &&
+                request.getGenre().isBlank() && request.getPublicationYear() == null &&
                 request.getAvailable() == null) {
             throw new InvalidCreateOrUpdateBookRequest();
         }
@@ -77,19 +78,26 @@ public class BookService {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new BookNotFoundException(id));
 
-        if (!request.getTitle().isEmpty()){
+        if (!request.getTitle().isBlank()){
             book.setTitle(request.getTitle());
         }
 
-        if (!request.getAuthor().isEmpty()){
+        if (!request.getAuthor().isBlank()){
             book.setAuthor(request.getAuthor());
         }
 
-        if (!request.getGenre().isEmpty()){
+        if (!request.getGenre().isBlank()){
             book.setGenre(request.getGenre());
         }
 
-        if (request.getPublicationYear() != 0){
+        if (!Integer.toString(request.getPublicationYear()).isBlank() &&
+                Integer.toString(request.getPublicationYear()).length() < 4 ||
+                request.getPublicationYear() < 0 ||
+                request.getPublicationYear() > Year.now(ZoneId.systemDefault()).getValue()) {
+            throw new InvalidPublicationYearException(request.getPublicationYear());
+        }
+
+        if (request.getPublicationYear() != null){
             book.setPublicationYear(request.getPublicationYear());
         }
 
@@ -114,6 +122,11 @@ public class BookService {
 
     public List<BookResponse> findAvailableBooks(){
         List<Book> books = bookRepository.findByAvailableTrue();
+        return books.stream().map(this::mapToResponse).toList();
+    }
+
+    public List<BookResponse> findBooksByPublicationYearAfter(int year){
+        List<Book> books = bookRepository.findBooksByPublicationYearAfter(year);
         return books.stream().map(this::mapToResponse).toList();
     }
 

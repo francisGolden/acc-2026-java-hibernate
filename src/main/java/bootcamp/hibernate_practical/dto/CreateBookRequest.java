@@ -7,5 +7,5 @@ public class CreateBookRequest {
     private String title;
     private String author;
     private String genre;
-    private int publicationYear;
+    private Integer publicationYear;
 }

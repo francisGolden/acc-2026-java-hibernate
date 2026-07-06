@@ -59,4 +59,9 @@ public class BookController {
         return bookService.findAvailableBooks();
     }
 
+    @GetMapping("/publicationYear_after/{publicationYear}")
+    public List<BookResponse> getBooksByPublicationYearAfter(@PathVariable int publicationYear) {
+        return bookService.findBooksByPublicationYearAfter(publicationYear);
+    }
+
 }
