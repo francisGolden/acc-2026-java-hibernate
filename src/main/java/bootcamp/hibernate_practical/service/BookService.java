@@ -43,26 +43,22 @@ public class BookService {
                 request.getPublicationYear(),
                 true
         );
-
         Book savedBook = bookRepository.save(book);
         return mapToResponse(savedBook);
     }
 
     public List<BookResponse> getAllBooks() {
-        List<Book> allBooks = bookRepository.findAll();
-        return allBooks.stream().map(this::mapToResponse).toList();
+        return bookRepository.findAll().stream().map(this::mapToResponse).toList();
     }
 
     public List<BookResponse> getBooksByTitle(String title){
-        List<Book> books = bookRepository.findByTitleContainingIgnoreCase(title);
-        return books.stream().map(this::mapToResponse).toList();
+        return bookRepository.findByTitleContainingIgnoreCase(title).stream()
+                .map(this::mapToResponse).toList();
     }
 
     public BookResponse getBookById(Long id) {
-        Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new BookNotFoundException(id));
-
-        return mapToResponse(book);
+        return mapToResponse(bookRepository.findById(id)
+                .orElseThrow(() -> new BookNotFoundException(id)));
     }
 
     public BookResponse updateBook(Long id, UpdateBookRequest request) {
@@ -102,14 +98,12 @@ public class BookService {
             book.setAvailable(request.getAvailable());
         }
 
-        bookRepository.save(book);
-
-        return mapToResponse(book);
+        Book savedBook = bookRepository.save(book);
+        return mapToResponse(savedBook);
     }
 
     public void deleteBook(Long id) {
-        Book book = bookRepository.findById(id).orElseThrow(() -> new BookNotFoundException(id));
-        bookRepository.delete(book);
+        bookRepository.delete(bookRepository.findById(id).orElseThrow(() -> new BookNotFoundException(id)));
     }
 
     public List<BookResponse> findByAuthor(String author) {
@@ -138,8 +132,8 @@ public class BookService {
             throw new BookAlreadyBorrowedException(id);
         }
         book.setBorrowStatus(true);
-        bookRepository.save(book);
-        return mapToResponse(book);
+        Book savedBook = bookRepository.save(book);
+        return mapToResponse(savedBook);
     }
 
     public BookResponse returnBook(long id){
@@ -149,8 +143,8 @@ public class BookService {
             throw new BookCannotBeReturnedException(id);
         }
         book.setBorrowStatus(false);
-        bookRepository.save(book);
-        return mapToResponse(book);
+        Book savedBook = bookRepository.save(book);
+        return mapToResponse(savedBook);
     }
 
     private BookResponse mapToResponse(Book book) {
