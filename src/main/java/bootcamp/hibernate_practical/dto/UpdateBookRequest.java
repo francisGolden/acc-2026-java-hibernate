@@ -7,6 +7,6 @@ public class UpdateBookRequest {
     private String title;
     private String author;
     private String genre;
-    private int publicationYear;
-    public boolean available;
+    private Integer publicationYear;
+    public Boolean available;
 }
