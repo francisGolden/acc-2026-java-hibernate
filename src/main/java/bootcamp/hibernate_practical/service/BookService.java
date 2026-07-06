@@ -130,6 +130,10 @@ public class BookService {
         return books.stream().map(this::mapToResponse).toList();
     }
 
+    public long getLibraryBooksCount(){
+        return bookRepository.count();
+    }
+
     private BookResponse mapToResponse(Book book) {
         return new BookResponse(book.getId(), book.getTitle(), book.getAuthor(),
                 book.getGenre(), book.getPublicationYear(), book.isAvailable());

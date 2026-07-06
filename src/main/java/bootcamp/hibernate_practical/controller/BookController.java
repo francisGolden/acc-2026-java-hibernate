@@ -64,4 +64,9 @@ public class BookController {
         return bookService.findBooksByPublicationYearAfter(publicationYear);
     }
 
+    @GetMapping("/get_library_books_count")
+    public long getLibraryBooksCount(){
+        return bookService.getLibraryBooksCount();
+    }
+
 }
