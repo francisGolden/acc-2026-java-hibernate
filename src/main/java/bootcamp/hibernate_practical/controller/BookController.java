@@ -69,12 +69,12 @@ public class BookController {
         return bookService.getLibraryBooksCount();
     }
 
-    @GetMapping("/borrow/{id}")
+    @PutMapping("/borrow/{id}")
     public BookResponse borrowBook(@PathVariable long id){
         return bookService.borrowBook(id);
     }
 
-    @GetMapping("/return/{id}")
+    @PutMapping("/return/{id}")
     public BookResponse returnBook(@PathVariable long id){
         return bookService.returnBook(id);
     }

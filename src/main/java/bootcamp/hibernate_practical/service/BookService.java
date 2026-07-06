@@ -43,8 +43,7 @@ public class BookService {
                 request.getPublicationYear(),
                 true
         );
-        Book savedBook = bookRepository.save(book);
-        return mapToResponse(savedBook);
+        return mapToResponse(bookRepository.save(book));
     }
 
     public List<BookResponse> getAllBooks() {
@@ -98,8 +97,7 @@ public class BookService {
             book.setAvailable(request.getAvailable());
         }
 
-        Book savedBook = bookRepository.save(book);
-        return mapToResponse(savedBook);
+        return mapToResponse(bookRepository.save(book));
     }
 
     public void deleteBook(Long id) {
@@ -132,8 +130,7 @@ public class BookService {
             throw new BookAlreadyBorrowedException(id);
         }
         book.setBorrowStatus(true);
-        Book savedBook = bookRepository.save(book);
-        return mapToResponse(savedBook);
+        return mapToResponse(bookRepository.save(book));
     }
 
     public BookResponse returnBook(long id){
@@ -143,8 +140,7 @@ public class BookService {
             throw new BookCannotBeReturnedException(id);
         }
         book.setBorrowStatus(false);
-        Book savedBook = bookRepository.save(book);
-        return mapToResponse(savedBook);
+        return mapToResponse(bookRepository.save(book));
     }
 
     private BookResponse mapToResponse(Book book) {
