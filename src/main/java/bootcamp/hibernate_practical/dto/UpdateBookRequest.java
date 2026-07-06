@@ -8,5 +8,6 @@ public class UpdateBookRequest {
     private String author;
     private String genre;
     private Integer publicationYear;
-    public Boolean available;
+    private Boolean available;
+    private Boolean borrowStatus;
 }

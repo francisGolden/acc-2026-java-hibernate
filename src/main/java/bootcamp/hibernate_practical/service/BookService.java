@@ -4,11 +4,8 @@ import bootcamp.hibernate_practical.dto.BookResponse;
 import bootcamp.hibernate_practical.dto.CreateBookRequest;
 import bootcamp.hibernate_practical.dto.UpdateBookRequest;
 import bootcamp.hibernate_practical.entity.Book;
-import bootcamp.hibernate_practical.exception.BookAlreadyPresentException;
-import bootcamp.hibernate_practical.exception.BookNotFoundException;
-import bootcamp.hibernate_practical.exception.InvalidCreateOrUpdateBookRequest;
+import bootcamp.hibernate_practical.exception.*;
 import bootcamp.hibernate_practical.repository.BookRepository;
-import bootcamp.hibernate_practical.exception.InvalidPublicationYearException;
 import org.springframework.stereotype.Service;
 
 import java.time.ZoneId;
@@ -46,32 +43,27 @@ public class BookService {
                 request.getPublicationYear(),
                 true
         );
-
-        Book savedBook = bookRepository.save(book);
-        return mapToResponse(savedBook);
+        return mapToResponse(bookRepository.save(book));
     }
 
     public List<BookResponse> getAllBooks() {
-        List<Book> allBooks = bookRepository.findAll();
-        return allBooks.stream().map(this::mapToResponse).toList();
+        return bookRepository.findAll().stream().map(this::mapToResponse).toList();
     }
 
     public List<BookResponse> getBooksByTitle(String title){
-        List<Book> books = bookRepository.findByTitleContainingIgnoreCase(title);
-        return books.stream().map(this::mapToResponse).toList();
+        return bookRepository.findByTitleContainingIgnoreCase(title).stream()
+                .map(this::mapToResponse).toList();
     }
 
     public BookResponse getBookById(Long id) {
-        Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new BookNotFoundException(id));
-
-        return mapToResponse(book);
+        return mapToResponse(bookRepository.findById(id)
+                .orElseThrow(() -> new BookNotFoundException(id)));
     }
 
     public BookResponse updateBook(Long id, UpdateBookRequest request) {
         if (request.getTitle().isBlank() && request.getAuthor().isBlank() &&
                 request.getGenre().isBlank() && request.getPublicationYear() == null &&
-                request.getAvailable() == null) {
+                request.getAvailable() == null && request.getBorrowStatus() == null) {
             throw new InvalidCreateOrUpdateBookRequest();
         }
 
@@ -105,14 +97,11 @@ public class BookService {
             book.setAvailable(request.getAvailable());
         }
 
-        bookRepository.save(book);
-
-        return mapToResponse(book);
+        return mapToResponse(bookRepository.save(book));
     }
 
     public void deleteBook(Long id) {
-        Book book = bookRepository.findById(id).orElseThrow(() -> new BookNotFoundException(id));
-        bookRepository.delete(book);
+        bookRepository.delete(bookRepository.findById(id).orElseThrow(() -> new BookNotFoundException(id)));
     }
 
     public List<BookResponse> findByAuthor(String author) {
@@ -134,8 +123,28 @@ public class BookService {
         return bookRepository.count();
     }
 
+    public BookResponse borrowBook(long id){
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new BookNotFoundException(id));
+        if (book.isBorrowStatus()){
+            throw new BookAlreadyBorrowedException(id);
+        }
+        book.setBorrowStatus(true);
+        return mapToResponse(bookRepository.save(book));
+    }
+
+    public BookResponse returnBook(long id){
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new BookNotFoundException(id));
+        if (!book.isBorrowStatus()){
+            throw new BookCannotBeReturnedException(id);
+        }
+        book.setBorrowStatus(false);
+        return mapToResponse(bookRepository.save(book));
+    }
+
     private BookResponse mapToResponse(Book book) {
         return new BookResponse(book.getId(), book.getTitle(), book.getAuthor(),
-                book.getGenre(), book.getPublicationYear(), book.isAvailable());
+                book.getGenre(), book.getPublicationYear(), book.isAvailable(), book.isBorrowStatus());
     }
 }
