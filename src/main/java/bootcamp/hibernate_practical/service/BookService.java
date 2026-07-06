@@ -68,8 +68,8 @@ public class BookService {
     }
 
     public BookResponse updateBook(Long id, UpdateBookRequest request) {
-        if (request.getTitle().isEmpty() || request.getAuthor().isEmpty() ||
-                request.getGenre().isEmpty() || request.getPublicationYear() == 0 ||
+        if (request.getTitle().isEmpty() && request.getAuthor().isEmpty() &&
+                request.getGenre().isEmpty() && request.getPublicationYear() == 0 &&
                 request.getAvailable() == null) {
             throw new InvalidCreateOrUpdateBookRequest();
         }
@@ -77,11 +77,21 @@ public class BookService {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new BookNotFoundException(id));
 
-        book.setTitle(request.getTitle());
-        book.setAuthor(request.getAuthor());
-        book.setGenre(request.getGenre());
+        if (!request.getTitle().isEmpty()){
+            book.setTitle(request.getTitle());
+        }
 
-        book.setPublicationYear(request.getPublicationYear());
+        if (!request.getAuthor().isEmpty()){
+            book.setAuthor(request.getAuthor());
+        }
+
+        if (!request.getGenre().isEmpty()){
+            book.setGenre(request.getGenre());
+        }
+
+        if (request.getPublicationYear() != 0){
+            book.setPublicationYear(request.getPublicationYear());
+        }
 
         if (request.getAvailable() != null) {
             book.setAvailable(request.getAvailable());
