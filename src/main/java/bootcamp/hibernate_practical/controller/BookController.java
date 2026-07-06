@@ -5,10 +5,7 @@ import bootcamp.hibernate_practical.dto.CreateBookRequest;
 import bootcamp.hibernate_practical.dto.UpdateBookRequest;
 import bootcamp.hibernate_practical.service.BookService;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/books")
@@ -78,5 +75,4 @@ public class BookController {
     public BookResponse returnBook(@PathVariable long id){
         return bookService.returnBook(id);
     }
-
 }
